@@ -935,7 +935,7 @@ nav.links a.phone-only { display: none; }
 .md th, .md td { overflow-wrap: break-word; word-break: normal; hyphens: manual; }
 .md td code, .md th code { white-space: nowrap; overflow-wrap: normal; word-break: keep-all; }
 
-/* ---- ForgeQE's own look (forgeqe.github.io): its ink, panels, blues and a fine grid, Ubuntu, light pill buttons, the
+/* ---- ForgeQE's own look (forgeqe.github.io): its ink, panels, blues and a fine gradient grid, Ubuntu, light pill buttons, the
    wordmark in the header. Dark first, as ForgeQE's site; the light theme keeps the same blues on paper. This layer
    comes last and sets every token, so the earlier palettes above only shape layout. */
 :root {
@@ -944,7 +944,7 @@ nav.links a.phone-only { display: none; }
   --acc: #4f8df5; --acc-text: #79aaff; --on-acc: #080a10; --slate: #02153b; --console: #141a26;
   --dot: 79, 141, 245; --dot-dim: 38, 48, 73;
   --good: #5bd1a4; --bad: #ff6b6b; --bad-d: #ff6b6b; --warn: #f5d58a;
-  --grid: rgba(150, 185, 255, .035); --glow: rgba(79, 141, 245, .14);
+  --grid: rgba(150, 185, 255, .035); --grid-a: rgba(121, 170, 255, .16); --grid-b: rgba(56, 189, 248, .05); --glow: rgba(79, 141, 245, .14);
   color-scheme: dark;
 }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
@@ -953,7 +953,7 @@ nav.links a.phone-only { display: none; }
   --acc: #2f6fdc; --acc-text: #2559c4; --on-acc: #ffffff; --slate: #02153b; --console: #0e121b;
   --dot: 47, 111, 220; --dot-dim: 160, 176, 204;
   --good: #1f8a62; --bad: #c62f3b; --bad-d: #c62f3b; --warn: #8a5a00;
-  --grid: rgba(2, 21, 59, .028); --glow: rgba(47, 111, 220, .10);
+  --grid: rgba(2, 21, 59, .028); --grid-a: rgba(47, 111, 220, .11); --grid-b: rgba(56, 189, 248, .04); --glow: rgba(47, 111, 220, .10);
   color-scheme: light;
 } }
 :root[data-theme="light"] {
@@ -962,7 +962,7 @@ nav.links a.phone-only { display: none; }
   --acc: #2f6fdc; --acc-text: #2559c4; --on-acc: #ffffff; --slate: #02153b; --console: #0e121b;
   --dot: 47, 111, 220; --dot-dim: 160, 176, 204;
   --good: #1f8a62; --bad: #c62f3b; --bad-d: #c62f3b; --warn: #8a5a00;
-  --grid: rgba(2, 21, 59, .028); --glow: rgba(47, 111, 220, .10);
+  --grid: rgba(2, 21, 59, .028); --grid-a: rgba(47, 111, 220, .11); --grid-b: rgba(56, 189, 248, .04); --glow: rgba(47, 111, 220, .10);
   color-scheme: light;
 }
 :root[data-theme="dark"] {
@@ -971,16 +971,24 @@ nav.links a.phone-only { display: none; }
   --acc: #4f8df5; --acc-text: #79aaff; --on-acc: #080a10; --slate: #02153b; --console: #141a26;
   --dot: 79, 141, 245; --dot-dim: 38, 48, 73;
   --good: #5bd1a4; --bad: #ff6b6b; --bad-d: #ff6b6b; --warn: #f5d58a;
-  --grid: rgba(150, 185, 255, .035); --glow: rgba(79, 141, 245, .14);
+  --grid: rgba(150, 185, 255, .035); --grid-a: rgba(121, 170, 255, .16); --grid-b: rgba(56, 189, 248, .05); --glow: rgba(79, 141, 245, .14);
   color-scheme: dark;
 }
 body {
   background-color: var(--bg);
-  background-image: radial-gradient(1100px 520px at 72% -120px, var(--glow), transparent 70%),
-    linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: auto, 24px 24px, 24px 24px;
+  background-image: radial-gradient(1100px 520px at 72% -120px, var(--glow), transparent 70%);
 }
 .top { background: color-mix(in srgb, var(--bg) 82%, transparent); }
+/* The grid: 16px lines in a gradient of ForgeQE's blues, brightest under the top glow and fading across the page. A
+   fixed layer behind everything: the gradient is the colour, the grid pattern is the mask. */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(120% 90% at 78% -10%, var(--grid-a) 0%, var(--grid-b) 45%, transparent 85%);
+  -webkit-mask-image: linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px);
+  mask-image: linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px);
+  -webkit-mask-size: 16px 16px; mask-size: 16px 16px;
+}
+
 .logo { height: 52px; }
 @media (max-width: 560px) { .logo { height: 40px; } }
 /* The main action is a light pill with dark text on ForgeQE's ink (dark on paper); the rest stay outlined. */
@@ -992,6 +1000,11 @@ body {
 .mbar { background: var(--console); border: 1px solid var(--line); }
 /* ForgeQE's headline voice: the second line in its blue, italic. */
 .hero h1 .line.accent { color: var(--acc-text); font-style: italic; font-weight: 500; }
+/* The headline at poster size, as on ForgeQE's own site: each line whole beside the sphere on wide screens. */
+@media (min-width: 961px) { .hero .copy { grid-column: 1 / span 7; } .orbbox { grid-column: 8 / span 5; } }
+.hero h1 { font-size: clamp(44px, 5.2vw, 72px); line-height: 1.02; letter-spacing: -.025em; position: relative; z-index: 1; }
+@media (min-width: 961px) { .hero h1 .line { white-space: nowrap; } }
+@media (max-width: 560px) { .hero h1 { font-size: clamp(38px, 11vw, 48px); } }
 </style>
 
 <header class="top gutter">
