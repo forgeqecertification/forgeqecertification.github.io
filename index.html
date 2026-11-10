@@ -1009,6 +1009,57 @@ body::after {
 .hero h1 { font-size: clamp(44px, 5.2vw, 72px); line-height: 1.02; letter-spacing: -.025em; position: relative; z-index: 1; }
 @media (min-width: 961px) { .hero h1 .line { white-space: nowrap; } }
 @media (max-width: 560px) { .hero h1 { font-size: clamp(38px, 11vw, 48px); } }
+
+/* ---- Flat, as the platform: structure from space, a tint and one faint rule between rows; no outline around a block.
+   Comes last, so the box treatments in the layers above end here. */
+:root { --tint: color-mix(in srgb, var(--ink) 4.5%, transparent); --tint-2: color-mix(in srgb, var(--ink) 8%, transparent); }
+body { margin: 0; }
+code, .code { font-size: .9em; }
+/* Panels: a tint, never an outline */
+.term, .win, .cmpslide, .closing, .ss-card, .ss, .qz, .mq, .modes article, .refs, .rules li, .scard, .pager a, .lside,
+.md pre, .doc .codeblock, .md blockquote, .mbar { border: 0; background: var(--tint); box-shadow: none; }
+.ss-side { border-color: var(--line-soft); }
+.pager a:hover { background: var(--tint-2); }
+.certfig img { border: 0; }
+/* Tables and fact lists: rows ruled, no frame */
+.kv, .tasklist, .md .table, .doc .table { border: 0; border-radius: 0; overflow: visible; }
+.kv { border-top: 1px solid var(--line-soft); }
+.kv div:last-child { border-bottom: 1px solid var(--line-soft); }
+.kv div { padding-inline: 0; }
+.md .table, .doc .table { overflow-x: auto; }
+.rlist li { border: 0; border-bottom: 1px solid var(--line-soft); border-radius: 0; padding-inline: 0; }
+/* Rows: the rule belongs to the row, so it runs straight; the hover is a rounded tint inside it */
+.lrow a, .lessonlist a, .refs a { border: 0; }
+.lrow, .lessonlist li, .refs li { border-bottom: 1px solid var(--line-soft); }
+.refs a { background: none; }
+.lrow a:hover, .lessonlist a:hover, .refs a:hover, .path a:hover, .path a:focus-visible, .medal-card:hover, .medal-card:focus-visible { background: var(--tint); }
+/* Quiet controls: a tint, no outline (the main action stays the solid pill) */
+.btn.ghost, .acct a:not(.primary), .icon-btn, .jump .jl, .qnav button, .mbar .btn.ghost { border-color: transparent; background: var(--tint); }
+.btn.ghost:hover, .acct a:not(.primary):hover, .icon-btn:hover, .jump .jl:hover, .qnav button:hover { background: var(--tint-2); }
+.cmpslide .tag { border: 0; background: color-mix(in srgb, var(--bg) 80%, transparent); }
+/* Answer options: a tint row; the border only appears to mark a choice or a verdict */
+.mexam .qz-opt, .qz .qz-opt { border: 1px solid transparent; background: var(--tint); }
+.mexam .qz-opt:hover, .qz .qz-opt:hover { background: var(--tint-2); }
+.qz { background: none; padding: 0; }
+.mexam .qz-opt.order, .qz .qz-opt.order { background: none; padding-inline: 0; }
+/* Numbered markers: a tint disc, no ring */
+.path .pn, .lessonlist .ln, .qz-opt.order .pos { border: 0; background: var(--tint); }
+
+/* The question bank: one column per topic, however many there are; on a phone each topic is a row */
+.cols { grid-template-columns: repeat(var(--n, 8), minmax(0, 1fr)); }
+@media (max-width: 560px) {
+  .cols { grid-template-columns: 1fr; gap: 10px; }
+  .col { grid-template-columns: 64px minmax(0, 1fr); justify-items: start; align-items: center; gap: 12px; }
+  .col span { order: -1; }
+  .col .dots { flex-direction: row; gap: 3px; flex-wrap: wrap; }
+  .col .dots i { width: 7px; height: 7px; }
+  /* The compare slider: its labels sit above the mock, not over it */
+  .cmpslide { aspect-ratio: 4 / 3.4; }
+  .cmpslide .pane { padding-top: 40px; }
+  /* The hero: the headline first, the sphere after it */
+  .orbbox { grid-row: auto; max-width: 300px; margin-top: 16px; }
+}
+.page .lhero { padding-top: 24px; }
 </style>
 
 <header class="top gutter">
@@ -2044,9 +2095,11 @@ function proofs() {
   onceVisible(seeds, (still) => { if (!still) hosts.forEach((td, i) => setTimeout(() => cipher(td, `${pairs[i][1]}.lab.forgeqe.test`, 800), i * 220)); });
   // The bank's dots fill in when seen.
   const most = Math.max(...DATA.bank.map((b) => b.have));
-  const short = { install: "Install", config: "Config", doctor: "Doctor", goals: "Goals", cases: "Cases", reports: "Reports", memory: "Memory", secrets: "Secrets" };
+  const short = { install: "Install", config: "Config", doctor: "Doctor", goals: "Goals", cases: "Cases", reports: "Reports", memory: "Memory", secrets: "Secrets", app: "Web app" };
+  // A topic added later still gets a label: the last part of its id, capitalised.
+  for (const b of DATA.bank) { const k = b.id.split(".")[1]; short[k] ??= k[0].toUpperCase() + k.slice(1); }
   const bank = el("figure", { class: "bankfig", style: "margin:0" },
-    el("div", { class: "cols", role: "img", "aria-label": DATA.bank.map((b) => `${short[b.id.split(".")[1]]}: ${b.have} questions, ${b.paper} drawn per paper`).join("; ") },
+    el("div", { class: "cols", role: "img", style: `--n:${DATA.bank.length}`, "aria-label": DATA.bank.map((b) => `${short[b.id.split(".")[1]]}: ${b.have} questions, ${b.paper} drawn per paper`).join("; ") },
       DATA.bank.map((b, c) => el("div", { class: "col" },
         el("div", { class: "dots" }, Array.from({ length: most }, (_, i) => el("i", { class: i < b.paper ? "p" : i < b.have ? "h" : "", style: `transition-delay:${(c * 40 + i * 22)}ms` }))),
         el("span", {}, short[b.id.split(".")[1]])))),
